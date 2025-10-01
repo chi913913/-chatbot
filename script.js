@@ -92,22 +92,25 @@ function sendMessage() {
     }
 
     const apiKey = 'AIzaSyAhMfff1TVI74GOJS9_uLX-1EKbgTWJHHM';
-    const endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
     const payload = {
-        model: "gemini-2.0-flash-exp",
-        messages: [
-            { role: "system", content: "You are a helpful assistant" },
-            { role: "user", content: message }
-        ],
-        stream: false
+        systemInstruction: {
+            role: "system",
+            parts: [{ text: "You are a helpful assistant" }]
+        },
+        contents: [
+            {
+                role: "user",
+                parts: [{ text: message }]
+            }
+        ]
     };
 
     fetch(endpoint, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`
+            'Content-Type': 'application/json'
         },
         body: JSON.stringify(payload)
     })
@@ -117,9 +120,9 @@ function sendMessage() {
         if (loadingElement) {
             loadingElement.style.display = 'none';
         }
-
-        if (data.choices && data.choices.length > 0) {
-            displayMessage('bot', data.choices[0].message.content);
+        const text = data && data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text;
+        if (text) {
+            displayMessage('bot', text);
         } else {
             displayMessage('bot', '出錯了，請稍後再試。');
         }
