@@ -60,18 +60,17 @@ function formatMessage(text) {
 // 顯示消息
 function displayMessage(role, message, imageData = null) {
     const messagesContainer = document.getElementById('messages');
-    const messageElement = document.createElement('div');
-    messageElement.className = `message ${role}`;
     
-    const avatar = document.createElement('img');
-    avatar.src = role === 'user' ? 'user-avatar.png' : 'bot-avatar.jpg';
-    avatar.alt = role === 'user' ? 'User' : 'Bot';
-
-    const messageContent = document.createElement('div');
-    messageContent.className = 'message-content';
-    
-    // 如果有圖片，先顯示圖片
+    // 如果有圖片，先創建圖片元素
     if (imageData) {
+        const imageElement = document.createElement('div');
+        imageElement.className = `message ${role}`;
+        
+        // 添加頭像
+        const avatar = document.createElement('img');
+        avatar.src = role === 'user' ? 'user-avatar.png' : 'bot-avatar.jpg';
+        avatar.alt = role === 'user' ? 'User' : 'Bot';
+        
         const imageContainer = document.createElement('div');
         imageContainer.className = 'image-container';
         
@@ -81,23 +80,41 @@ function displayMessage(role, message, imageData = null) {
         image.alt = '上傳的圖片';
         
         imageContainer.appendChild(image);
-        messageContent.appendChild(imageContainer);
+        imageElement.appendChild(avatar);
+        imageElement.appendChild(imageContainer);
+        messagesContainer.appendChild(imageElement);
     }
     
-    // 如果有文字消息，顯示文字
+    // 如果有文字消息，創建文字消息元素（但不包含頭像，如果已經有圖片的話）
     if (message) {
+        const messageElement = document.createElement('div');
+        messageElement.className = `message ${role}`;
+        
+        // 只有在沒有圖片的情況下才添加頭像
+        if (!imageData) {
+            const avatar = document.createElement('img');
+            avatar.src = role === 'user' ? 'user-avatar.png' : 'bot-avatar.jpg';
+            avatar.alt = role === 'user' ? 'User' : 'Bot';
+            messageElement.appendChild(avatar);
+        }
+
+        const messageContent = document.createElement('div');
+        messageContent.className = 'message-content';
+        
         const textContent = document.createElement('div');
         textContent.innerHTML = role === 'user' ? message : formatMessage(message);
         messageContent.appendChild(textContent);
-    }
 
-    messageElement.appendChild(avatar);
-    messageElement.appendChild(messageContent);
-    messagesContainer.appendChild(messageElement);
+        messageElement.appendChild(messageContent);
+        messagesContainer.appendChild(messageElement);
+    }
     
     // 平滑滾動到底部
-    messageElement.scrollIntoView({ behavior: 'smooth' });
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
+
+// 全域變數存儲當前選擇的圖片
+let currentImageData = null;
 
 // 處理圖片上傳
 function handleImageUpload(event) {
@@ -120,17 +137,33 @@ function handleImageUpload(event) {
     reader.onload = function(e) {
         const imageData = e.target.result;
         
-        // 顯示上傳的圖片
-        displayMessage('user', '已上傳圖片', imageData);
+        // 儲存圖片數據
+        currentImageData = imageData;
         
-        // 自動發送圖片到 Gemini 進行分析
-        sendImageToGemini(imageData, file.name);
+        // 顯示圖片預覽
+        showImagePreview(imageData);
     };
     
     reader.readAsDataURL(file);
     
     // 清空檔案輸入
     event.target.value = '';
+}
+
+// 顯示圖片預覽
+function showImagePreview(imageData) {
+    const previewContainer = document.getElementById('image-preview');
+    const previewImg = document.getElementById('preview-img');
+    
+    previewImg.src = imageData;
+    previewContainer.style.display = 'block';
+}
+
+// 移除圖片
+function removeImage() {
+    const previewContainer = document.getElementById('image-preview');
+    currentImageData = null;
+    previewContainer.style.display = 'none';
 }
 
 // 發送圖片到 Gemini Vision API
@@ -216,11 +249,15 @@ async function sendMessage() {
     const inputElement = document.getElementById('chat-input');
     const message = inputElement.value.trim();
     
-    if (!message) return;
+    // 如果沒有文字消息也沒有圖片，則不發送
+    if (!message && !currentImageData) return;
 
     // 顯示用戶消息
-    displayMessage('user', message);
+    displayMessage('user', message , currentImageData);
+    
+    // 清空輸入和圖片預覽
     inputElement.value = '';
+    removeImage();
 
     // 顯示加載動畫
     const loadingElement = document.getElementById('loading');
@@ -229,15 +266,29 @@ async function sendMessage() {
     }
 
     try {
-        // 準備 API 請求
+        // 準備 API 請求的 parts 陣列
+        const parts = [];
+        
+        // 如果有文字消息，添加文字部分
+        if (message) {
+            parts.push({ text: message });
+        }
+        
+        // 如果有圖片，添加圖片部分
+        if (currentImageData) {
+            const base64Data = currentImageData.split(',')[1];
+            parts.push({
+                inline_data: {
+                    mime_type: "image/jpeg",
+                    data: base64Data
+                }
+            });
+        }
+
         const payload = {
             contents: [
                 {
-                    parts: [
-                        {
-                            text: message
-                        }
-                    ]
+                    parts: parts
                 }
             ]
         };

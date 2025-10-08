@@ -11,7 +11,7 @@ body {
 
 .chat-container {
     width: 100%;
-    max-width: 600px;
+    max-width: 800px;
     background-color: #fff;
     padding: 20px;
     border-radius: 10px;
@@ -40,11 +40,20 @@ body {
     margin-bottom: 15px;
 }
 
+.message.user {
+    flex-direction: row-reverse;
+}
+
 .message img {
     width: 40px;
     height: 40px;
     border-radius: 50%;
     margin-right: 10px;
+}
+
+.message.user img {
+    margin-right: 0;
+    margin-left: 10px;
 }
 
 .message-content {
@@ -55,6 +64,14 @@ body {
     line-height: 1.6;
 }
 
+.message.user .message-content {
+    background-color: #007bff;
+    backdrop-filter: blur(80px);
+    color: white;
+    text-align: right;
+    margin-right: 6%;
+}
+
 .message-content .title {
     font-size: 1.3em;
     font-weight: bold;
@@ -63,33 +80,13 @@ body {
     color: #333;
 }
 
-.message.user {
-    flex-direction: row-reverse;
-}
 
-.message.user img {
-    margin-left: 10px;
-    margin-right: 0;
-}
-
-.message.user .message-content {
-    background-color: #007bff;
-    backdrop-filter: blur(80px);
-    color: white;
-    text-align: right;
-}
 
 .message.bot .message-content {
     background-color: #f1f3f5;
 }
 
 .input-container {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.input-row {
     display: flex;
     gap: 8px;
     align-items: center;
@@ -120,17 +117,6 @@ body {
     border: none;
     border-radius: 5px;
     cursor: pointer;
-}
-
-#image-upload-btn {
-    padding: 10px 12px;
-    min-width: 50px;
-    font-size: 18px;
-    background-color: #28a745;
-}
-
-#image-upload-btn:hover {
-    background-color: #218838;
 }
 
 .input-container button:hover {
@@ -174,7 +160,7 @@ body {
     }
 }
 
-/* 添加下拉菜单样式 */
+/* 添加下拉菜單*/
 .dropdown {
     position: relative;
     display: inline-block;
@@ -210,7 +196,7 @@ body {
     background-color: #f8f9fa;
 }
 
-/* 深色模式样式 */
+/* 深色模式 */
 body.dark-mode {
     background-color: #1a1a1a;
 }
@@ -234,7 +220,7 @@ body.dark-mode {
 }
 
 .dark-mode .message.user .message-content {
-    background-color: #0056b3;
+    background-color: #007bff;
     backdrop-filter: blur(80px);
 }
 
@@ -257,7 +243,7 @@ body.dark-mode {
     background-color: #383838;
 }
 
-/* 段落样式 */
+/* 段落樣式 */
 .message-content p {
     margin: 10px 0;
     line-height: 1.6;
@@ -267,7 +253,7 @@ body.dark-mode {
     color: #fff;
 }
 
-/* 调整标题和段落样式 */
+/* 調整標題和段落樣式 */
 .message-content .title {
     font-size: 1.3em;
     font-weight: bold;
@@ -285,31 +271,31 @@ body.dark-mode {
     color: #fff;
 }
 
-/* 粗体文本样式 */
+/* 粗體文本樣式 */
 .message-content .bold-text {
     font-weight: bold;
     font-size: 1.1em;
     color: #333;
 }
 
-/* 段落标题样式 */
+/* 段落標題樣式 */  
 .message-content .section-title {
     font-size: 1.1em;
     font-weight: bold;
     margin: 16px 0 8px 0;
 }
 
-/* 子段落样式 */
+/* 子段落樣式 */
 .message-content .subsection {
     margin: 8px 0 8px 20px;
 }
 
-/* 正文样式 */
+/* 正文樣式 */
 .message-content .subtitle {
     font-weight: bold;
 }
 
-/* 深色模式适配 */
+/* 深色模式適配 */
 .dark-mode .message-content .bold-text,
 .dark-mode .message-content .section-title,
 .dark-mode .message-content .subtitle,
@@ -324,38 +310,87 @@ body.dark-mode {
     margin-bottom: 20px;
 }
 
-/* 圖片上傳相關樣式 */
+         /* 圖片上傳相關樣式 */
 .uploaded-image {
-    max-width: 300px;
-    max-height: 200px;
-    border-radius: 8px;
-    margin: 8px 0;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
+    max-height: 400px;
+    width: auto;
+    height: auto;
+    margin: 0 0 8px 0;
     cursor: pointer;
     transition: transform 0.2s ease;
+    background: none;
+    border: none;
 }
 
 .uploaded-image:hover {
     transform: scale(1.02);
 }
 
-.message-content .image-container {
-    margin: 8px 0;
-    text-align: center;
+.image-container {
+    margin: 0 0 8px 0;
+    text-align: right;
 }
 
-.message-content .image-container img {
-    max-width: 100%;
+.image-container img {
+    max-width: 500px;
+    max-height: 400px;
+    width: auto;
     height: auto;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 0;
+    margin: 0;
 }
 
 /* 深色模式下的圖片樣式 */
-.dark-mode .uploaded-image {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+/* 圖片預覽樣式 */
+.image-preview {
+    position: relative;
+    margin-top: 8px;
+    padding: 8px;
+    background-color: #f8f9fa;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    text-align: center;
 }
 
-.dark-mode .message-content .image-container img {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+.image-preview img {
+    max-width: 300px;
+    max-height: 250px;
+    width: auto;
+    height: auto;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.image-preview #remove-image {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 24px;
+    height: 24px;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.image-preview #remove-image:hover {
+    background-color: #c82333;
+}
+
+/* 深色模式下的圖片預覽 */
+.dark-mode .image-preview {
+    background-color: #383838;
+    border-color: #444;
+}
+
+.dark-mode .image-preview img {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
