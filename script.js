@@ -89,17 +89,18 @@ function displayMessage(role, message, imageData = null) {
     if (message) {
         const messageElement = document.createElement('div');
         messageElement.className = `message ${role}`;
-        
+
+        const messageContent = document.createElement('div');
+        messageContent.className = 'message-content';
+
         // 只有在沒有圖片的情況下才添加頭像
         if (!imageData) {
             const avatar = document.createElement('img');
             avatar.src = role === 'user' ? 'user-avatar.png' : 'bot-avatar.jpg';
             avatar.alt = role === 'user' ? 'User' : 'Bot';
             messageElement.appendChild(avatar);
+            messageContent.style.marginRight = '0';
         }
-
-        const messageContent = document.createElement('div');
-        messageContent.className = 'message-content';
         
         const textContent = document.createElement('div');
         textContent.innerHTML = role === 'user' ? message : formatMessage(message);
