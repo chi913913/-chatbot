@@ -91,7 +91,8 @@ function sendMessage() {
         loadingElement.style.display = 'block';
     }
 
-    const GOOGLE_API_KEY="AIzaSyCEFHtAG98fLQ8oSPMAGWiqc7b_Wao00wg" 
+    const GOOGLE_API_KEY = "AIzaSyCEFHtAG98fLQ8oSPMAGWiqc7b_Wao00wg";
+    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GOOGLE_API_KEY}`;
     
     // 根據 REST API 的文件重構 payload
     const payload = {
