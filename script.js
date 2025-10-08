@@ -1,3 +1,7 @@
+// Gemini API 配置
+const GEMINI_API_KEY = "AIzaSyCEFHtAG98fLQ8oSPMAGWiqc7b_Wao00wg";
+const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+
 // 格式化消息文本
 function formatMessage(text) {
     if (!text) return '';
@@ -28,11 +32,11 @@ function formatMessage(text) {
             while (currentIndex < lines.length) {
                 let line = lines[currentIndex].trim();
                 
-                // 如果是數字開頭（如 "1.")
+                // 如果是數字開頭（如 "1."）
                 if (/^\d+\./.test(line)) {
                     result += `<p class="section-title">${line}</p>`;
                 }
-                    // 如果是小標題（以破折號開頭）
+                // 如果是小標題（以破折號開頭）
                 else if (line.startsWith('-')) {
                     result += `<p class="subsection"><span class="bold-text">${line.replace(/^-/, '').trim()}</span></p>`;
                 }
@@ -77,11 +81,14 @@ function displayMessage(role, message) {
     messageElement.scrollIntoView({ behavior: 'smooth' });
 }
 
-function sendMessage() {
+// 發送消息到 Gemini API
+async function sendMessage() {
     const inputElement = document.getElementById('chat-input');
-    const message = inputElement.value;
-    if (!message.trim()) return;
+    const message = inputElement.value.trim();
+    
+    if (!message) return;
 
+    // 顯示用戶消息
     displayMessage('user', message);
     inputElement.value = '';
 
@@ -91,67 +98,70 @@ function sendMessage() {
         loadingElement.style.display = 'block';
     }
 
-    const GOOGLE_API_KEY = "AIzaSyCEFHtAG98fLQ8oSPMAGWiqc7b_Wao00wg";
-    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GOOGLE_API_KEY}`;
-    
-    // 根據 REST API 的文件重構 payload
-    const payload = {
-        // systemInstruction 是一個較新的參數，可以這樣添加
-        "systemInstruction": {
-            "role": "system",
-            "parts": [{ "text": "You are a helpful assistant" }]
-        },
-        "contents": [
-            {
-                "role": "user",
-                "parts": [{ "text": message }]
-            }
-        ]
-    };
+    try {
+        // 準備 API 請求
+        const payload = {
+            contents: [
+                {
+                    parts: [
+                        {
+                            text: message
+                        }
+                    ]
+                }
+            ]
+        };
 
-    fetch(API_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        mode: 'cors',
-        body: JSON.stringify(payload)
-    })
-    .then(response => {
-        console.log('API Response Status:', response.status);
+        console.log('發送請求到 Gemini API...');
+        console.log('Payload:', payload);
+
+        const response = await fetch(GEMINI_API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-goog-api-key': GEMINI_API_KEY
+            },
+            body: JSON.stringify(payload)
+        });
+
+        console.log('API 回應狀態:', response.status);
+
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`HTTP 錯誤! 狀態: ${response.status}`);
         }
-        return response.json();
-    })
-    .then(data => {
-        console.log('API Response Data:', data);
-        // 隱藏加載動畫
-        if (loadingElement) {
-            loadingElement.style.display = 'none';
-        }
-        
-        // 檢查回應結構
-        if (data && data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text) {
-            const text = data.candidates[0].content.parts[0].text;
-            displayMessage('bot', text);
-        } else {
-            console.error('Unexpected API response structure:', data);
-            displayMessage('bot', `API 回應格式錯誤。回應內容: ${JSON.stringify(data)}`);
-        }
-    })
-    .catch(error => {
+
+        const data = await response.json();
+        console.log('API 回應資料:', data);
+
         // 隱藏加載動畫
         if (loadingElement) {
             loadingElement.style.display = 'none';
         }
 
-        console.error('Detailed Error:', error);
+        // 解析回應
+        if (data && data.candidates && data.candidates[0] && 
+            data.candidates[0].content && data.candidates[0].content.parts && 
+            data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text) {
+            
+            const botResponse = data.candidates[0].content.parts[0].text;
+            displayMessage('bot', botResponse);
+        } else {
+            console.error('意外的 API 回應結構:', data);
+            displayMessage('bot', '抱歉，我無法理解這個回應。請稍後再試。');
+        }
+
+    } catch (error) {
+        // 隱藏加載動畫
+        if (loadingElement) {
+            loadingElement.style.display = 'none';
+        }
+
+        console.error('詳細錯誤:', error);
         displayMessage('bot', `連線錯誤: ${error.message}`);
-    });
+    }
 }
 
-// 添加主題切換功能
+// 主題切換功能
 function toggleTheme() {
     document.body.classList.toggle('dark-mode');
     const chatContainer = document.querySelector('.chat-container');
@@ -166,17 +176,7 @@ function toggleTheme() {
     localStorage.setItem('darkMode', isDarkMode);
 }
 
-// 頁面加載時檢查主題設置
-document.addEventListener('DOMContentLoaded', () => {
-    const isDarkMode = localStorage.getItem('darkMode') === 'true';
-    if (isDarkMode) {
-        document.body.classList.add('dark-mode');
-        document.querySelector('.chat-container').classList.add('dark-mode');
-        document.querySelector('.messages').classList.add('dark-mode');
-    }
-});
-
-// 添加下拉選單功能
+// 下拉選單功能
 function toggleDropdown(event) {
     event.preventDefault();
     document.getElementById('dropdownMenu').classList.toggle('show');
@@ -194,10 +194,26 @@ window.onclick = function(event) {
     }
 }
 
-// 添加回車發送功能
-document.getElementById('chat-input').addEventListener('keypress', function(event) {
-    if (event.key === 'Enter' && !event.shiftKey) {
-        event.preventDefault();
-        sendMessage();
+// 頁面加載時初始化
+document.addEventListener('DOMContentLoaded', () => {
+    // 檢查並應用保存的主題設置
+    const isDarkMode = localStorage.getItem('darkMode') === 'true';
+    if (isDarkMode) {
+        document.body.classList.add('dark-mode');
+        document.querySelector('.chat-container').classList.add('dark-mode');
+        document.querySelector('.messages').classList.add('dark-mode');
     }
+
+    // 添加回車發送功能
+    const chatInput = document.getElementById('chat-input');
+    if (chatInput) {
+        chatInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        });
+    }
+
+    console.log('聊天機器人已初始化完成！');
 });
