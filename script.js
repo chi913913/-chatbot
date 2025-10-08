@@ -91,9 +91,8 @@ function sendMessage() {
         loadingElement.style.display = 'block';
     }
 
-    const API_KEY = 'AIzaSyD-5an6VlSuLmEudVrscP1NJjdNiuuYU8g'; 
-    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`;
-
+    const GOOGLE_API_KEY="AIzaSyCEFHtAG98fLQ8oSPMAGWiqc7b_Wao00wg" 
+    
     // 根據 REST API 的文件重構 payload
     const payload = {
         // systemInstruction 是一個較新的參數，可以這樣添加
