@@ -252,10 +252,19 @@ async function sendMessage() {
     
     // 如果沒有文字消息也沒有圖片，則不發送
     if (!message && !currentImageData) return;
+    
+    const imageToSend = currentImageData;
 
     // 顯示用戶消息
-    displayMessage('user', message , currentImageData);
-    
+    if (imageToSend) {
+        // 顯示圖片
+        displayMessage('user', null, imageToSend);
+    }
+    if (message) {
+        // 顯示文字
+        displayMessage('user', message);
+    }
+
     // 清空輸入和圖片預覽
     inputElement.value = '';
     removeImage();
@@ -276,8 +285,8 @@ async function sendMessage() {
         }
         
         // 如果有圖片，添加圖片部分
-        if (currentImageData) {
-            const base64Data = currentImageData.split(',')[1];
+        if (imageToSend) {
+            const base64Data = imageToSend.split(',')[1];
             parts.push({
                 inline_data: {
                     mime_type: "image/jpeg",
