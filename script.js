@@ -114,19 +114,30 @@ function sendMessage() {
         headers: {
             'Content-Type': 'application/json'
         },
+        mode: 'cors',
         body: JSON.stringify(payload)
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('API Response Status:', response.status);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(data => {
+        console.log('API Response Data:', data);
         // 隱藏加載動畫
         if (loadingElement) {
             loadingElement.style.display = 'none';
         }
-        const text = data && data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text;
-        if (text) {
+        
+        // 檢查回應結構
+        if (data && data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text) {
+            const text = data.candidates[0].content.parts[0].text;
             displayMessage('bot', text);
         } else {
-            displayMessage('bot', '出錯了，請稍後再試。');
+            console.error('Unexpected API response structure:', data);
+            displayMessage('bot', `API 回應格式錯誤。回應內容: ${JSON.stringify(data)}`);
         }
     })
     .catch(error => {
@@ -135,8 +146,8 @@ function sendMessage() {
             loadingElement.style.display = 'none';
         }
 
-        displayMessage('bot', '出錯了，請稍後再試。');
-        console.error('Error:', error);
+        console.error('Detailed Error:', error);
+        displayMessage('bot', `連線錯誤: ${error.message}`);
     });
 }
 
