@@ -58,20 +58,38 @@ function formatMessage(text) {
 }
 
 // 顯示消息
-function displayMessage(role, message) {
+function displayMessage(role, message, imageData = null) {
     const messagesContainer = document.getElementById('messages');
     const messageElement = document.createElement('div');
     messageElement.className = `message ${role}`;
     
     const avatar = document.createElement('img');
-    avatar.src = role === 'user' ? 'user-avatar.png' : 'bot-avatar.png';
+    avatar.src = role === 'user' ? 'user-avatar.png' : 'bot-avatar.jpg';
     avatar.alt = role === 'user' ? 'User' : 'Bot';
 
     const messageContent = document.createElement('div');
     messageContent.className = 'message-content';
     
-    // 用戶消息直接顯示，機器人消息需要格式化
-    messageContent.innerHTML = role === 'user' ? message : formatMessage(message);
+    // 如果有圖片，先顯示圖片
+    if (imageData) {
+        const imageContainer = document.createElement('div');
+        imageContainer.className = 'image-container';
+        
+        const image = document.createElement('img');
+        image.src = imageData;
+        image.className = 'uploaded-image';
+        image.alt = '上傳的圖片';
+        
+        imageContainer.appendChild(image);
+        messageContent.appendChild(imageContainer);
+    }
+    
+    // 如果有文字消息，顯示文字
+    if (message) {
+        const textContent = document.createElement('div');
+        textContent.innerHTML = role === 'user' ? message : formatMessage(message);
+        messageContent.appendChild(textContent);
+    }
 
     messageElement.appendChild(avatar);
     messageElement.appendChild(messageContent);
@@ -79,6 +97,118 @@ function displayMessage(role, message) {
     
     // 平滑滾動到底部
     messageElement.scrollIntoView({ behavior: 'smooth' });
+}
+
+// 處理圖片上傳
+function handleImageUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // 檢查檔案類型
+    if (!file.type.startsWith('image/')) {
+        alert('請選擇圖片檔案！');
+        return;
+    }
+
+    // 檢查檔案大小 (限制為 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+        alert('圖片檔案太大，請選擇小於 10MB 的圖片！');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const imageData = e.target.result;
+        
+        // 顯示上傳的圖片
+        displayMessage('user', '已上傳圖片', imageData);
+        
+        // 自動發送圖片到 Gemini 進行分析
+        sendImageToGemini(imageData, file.name);
+    };
+    
+    reader.readAsDataURL(file);
+    
+    // 清空檔案輸入
+    event.target.value = '';
+}
+
+// 發送圖片到 Gemini Vision API
+async function sendImageToGemini(imageData, fileName) {
+    // 顯示加載動畫
+    const loadingElement = document.getElementById('loading');
+    if (loadingElement) {
+        loadingElement.style.display = 'block';
+    }
+
+    try {
+        // 將 base64 轉換為可用的格式
+        const base64Data = imageData.split(',')[1];
+        
+        const payload = {
+            contents: [
+                {
+                    parts: [
+                        {
+                            text: "請分析這張圖片並描述其內容。"
+                        },
+                        {
+                            inline_data: {
+                                mime_type: "image/jpeg",
+                                data: base64Data
+                            }
+                        }
+                    ]
+                }
+            ]
+        };
+
+        console.log('發送圖片到 Gemini Vision API...');
+
+        const response = await fetch(GEMINI_API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-goog-api-key': GEMINI_API_KEY
+            },
+            body: JSON.stringify(payload)
+        });
+
+        console.log('API 回應狀態:', response.status);
+
+        if (!response.ok) {
+            throw new Error(`HTTP 錯誤! 狀態: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('API 回應資料:', data);
+
+        // 隱藏加載動畫
+        if (loadingElement) {
+            loadingElement.style.display = 'none';
+        }
+
+        // 解析回應
+        if (data && data.candidates && data.candidates[0] && 
+            data.candidates[0].content && data.candidates[0].content.parts && 
+            data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text) {
+            
+            const botResponse = data.candidates[0].content.parts[0].text;
+            displayMessage('bot', botResponse);
+        } else {
+            console.error('意外的 API 回應結構:', data);
+            displayMessage('bot', '抱歉，我無法分析這張圖片。請稍後再試。');
+        }
+
+    } catch (error) {
+        // 隱藏加載動畫
+        if (loadingElement) {
+            loadingElement.style.display = 'none';
+        }
+
+        console.error('詳細錯誤:', error);
+        displayMessage('bot', `圖片分析錯誤: ${error.message}`);
+    }
 }
 
 // 發送消息到 Gemini API

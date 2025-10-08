@@ -85,6 +85,18 @@ body {
 
 .input-container {
     display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.input-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.button-row {
+    display: flex;
     gap: 8px;
     align-items: center;
 }
@@ -108,6 +120,17 @@ body {
     border: none;
     border-radius: 5px;
     cursor: pointer;
+}
+
+#image-upload-btn {
+    padding: 10px 12px;
+    min-width: 50px;
+    font-size: 18px;
+    background-color: #28a745;
+}
+
+#image-upload-btn:hover {
+    background-color: #218838;
 }
 
 .input-container button:hover {
@@ -299,4 +322,40 @@ body.dark-mode {
     font-size: 16px;
     color: #666;
     margin-bottom: 20px;
+}
+
+/* 圖片上傳相關樣式 */
+.uploaded-image {
+    max-width: 300px;
+    max-height: 200px;
+    border-radius: 8px;
+    margin: 8px 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.uploaded-image:hover {
+    transform: scale(1.02);
+}
+
+.message-content .image-container {
+    margin: 8px 0;
+    text-align: center;
+}
+
+.message-content .image-container img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 深色模式下的圖片樣式 */
+.dark-mode .uploaded-image {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .message-content .image-container img {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
