@@ -1,0 +1,207 @@
+<!DOCTYPE HTML>
+<!--
+  Strata × 室內裝潢 AI 助理 整合版
+  結合 HTML5 UP Strata 模板與原有 AI 上傳互動功能
+-->
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <title>室內裝潢 AI 助理｜魯班 IN 2025</title>
+    
+    <!-- Strata 主樣式 -->
+    <link rel="stylesheet" href="assets/css/main.css" />
+    <!-- 原專案樣式（整合後的風格修飾） -->
+    <link rel="stylesheet" href="style.css" />
+
+    <!-- 字體 -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  </head>
+
+  <body class="is-preload">
+    <!-- 左側固定 Header（Strata 模板） -->
+    <header id="header">
+      <div class="inner">
+        <h1>
+          <strong>魯班 AI IN 2025</strong><br />
+          上傳房間照片 →<br />
+		  一鍵獲得坪數估算與商品建議!<br />
+        </h1>
+      </div>
+    </header>
+
+    <!-- 主內容區 -->
+    <div id="main">
+
+      <!-- 主要 AI 功能區 -->
+      <section id="ai-assistant">
+        <div class="social-bar">
+          <a href="#" class="fa-brands fa-instagram" title="Instagram"></a>
+          <a href="#" class="fa-brands fa-facebook" title="Facebook"></a>
+          <a href="#" class="fa-brands fa-github" title="GitHub"></a>
+        </div>
+        <header class="major">
+          <h2>坪數估算 × 估價預測 × 商品推薦</h2>
+          <p>上傳室內照片，讓 AI 協助你分析空間、估算面積、推薦磁磚、油漆與建材商品!</p>
+        </header>
+
+        <div class="chat-panel">
+          <div class="chat-card glass">
+            <div class="messages" id="messages"></div>
+
+            <div id="loading" class="loading" style="display:none;">
+              <span class="spinner"></span>
+              <span>AI 正在分析影像…</span>
+            </div>
+
+            <!-- 拖放上傳區 -->
+            <div id="dropzone" class="dropzone" onclick="document.getElementById('image-input').click()">
+              <div class="dz-inner">
+                <div class="dz-icon">📷</div>
+                <div class="dz-text">
+                  <p><strong>拖放照片到此</strong> 或點擊選擇</p>
+                  <p class="hint">支援 JPG / PNG，建議 &lt; 10MB</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 圖片預覽 -->
+            <input id="image-input" type="file" accept="image/*" style="display:none;" onchange="handleImageUpload(event)" />
+            <div id="image-preview" class="image-preview" style="display:none;">
+              <img id="preview-img" src="" alt="預覽圖片" />
+              <button id="remove-image" onclick="removeImage()" title="移除圖片">×</button>
+            </div>
+            <!-- === 預設問題按鈕區 === -->
+            <div class="quick-questions">
+              <button class="quick-btn" onclick="setQuickQuestion('估算照片裡空間的坪數')">估算坪數</button>
+              <button class="quick-btn" onclick="setQuickQuestion('預估房間的裝修費用')">預估裝修費</button>
+              <button class="quick-btn" onclick="setQuickQuestion('請推薦給我適合的商品')">商品推薦</button>
+            </div>
+
+            <!-- 輸入區 -->
+            <!-- 輸入區 -->
+            <div class="input-bar">
+              <input
+              id="chat-input"
+              class="text-input"
+              type="text"
+              placeholder="描述你的需求，例如：「估坪＋估價＋磁磚推薦！」 …"
+              />
+              <div class="btn-group">
+                <button class="btn primary" onclick="sendMessage()">發送</button>
+                <button id="image-upload-btn" class="btn" onclick="document.getElementById('image-input').click()">上傳圖片</button>
+              </div>
+            </div>
+
+
+        <!-- 快速上手與範例指令 -->
+        <div class="row" style="margin-top:3em;">
+          <div class="col-6 col-12-medium">
+            <div class="card info">
+              <h3>快速上手</h3>
+              <ol>
+                <li>點 <strong>上傳圖片</strong> 或直接拖放照片。</li>
+                <li>輸入需求（例：<em>想要北歐風+木地板</em>）。</li>
+                <li>按 <strong>發送</strong>，AI 會回覆坪數、風格與商品建議。</li>
+              </ol>
+              <p class="tips">
+                💡 小撇步：正面、光線均勻的室內照更好辨識；可補充<strong>房高/參考物尺寸</strong>提升估算準確度。
+              </p>
+            </div>
+          </div>
+
+          <div class="col-6 col-12-medium">
+            <div class="card shortcuts">
+              <h3>範例指令</h3>
+              <ul>
+                <li>「估算這間臥室的坪數與動線優化」</li>
+                <li>「改成日系無印風，需要哪些家具？」</li>
+                <li>「依 B&Q 推薦木地板與燈具」</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 關於 -->
+      <section id="about">
+        <h2>東吳資科</h2>
+        <p>
+          魯班AI IN 2025
+        </p>
+      
+      <div class="bottom-social">
+        <a href="#" class="fa-brands fa-facebook"></a>
+        <a href="#" class="fa-brands fa-instagram"></a>
+        <a href="#" class="fa-brands fa-github"></a>
+        <img src="images/qrcode.png" alt="QR Code" class="qr-code" />
+      </section>
+    </div>
+    <!-- Footer -->
+    <footer id="footer">
+      <div class="social-icons">
+        <a href="https://github.com/" target="_blank" class="fa-brands fa-github" title="GitHub"></a>
+        <a href="mailto:example@mail.com" class="fa-solid fa-envelope" title="Email"></a>
+      </div>
+    </footer>
+
+
+    <!-- 拖放邏輯與功能 JS -->
+    <script>
+      const dz = document.getElementById('dropzone');
+      const fileInput = document.getElementById('image-input');
+      ['dragenter', 'dragover'].forEach(evt => {
+        dz.addEventListener(evt, e => { e.preventDefault(); dz.classList.add('dragging'); });
+      });
+      ['dragleave', 'drop'].forEach(evt => {
+        dz.addEventListener(evt, e => { e.preventDefault(); dz.classList.remove('dragging'); });
+      });
+      dz.addEventListener('drop', e => {
+        const file = e.dataTransfer.files && e.dataTransfer.files[0];
+        if (file) {
+          const dt = new DataTransfer();
+          dt.items.add(file);
+          fileInput.files = dt.files;
+          const event = new Event('change');
+          fileInput.dispatchEvent(event);
+        }
+      });
+    </script>
+
+    <!-- 原 script.js -->
+    <script src="assets/js/script.js"></script>
+
+    <!-- Strata 原 JS -->
+    <script src="assets/js/jquery.min.js"></script>
+    <script src="assets/js/jquery.poptrox.min.js"></script>
+    <script src="assets/js/browser.min.js"></script>
+    <script src="assets/js/breakpoints.min.js"></script>
+    <script src="assets/js/util.js"></script>
+    <script src="assets/js/main.js"></script>
+
+
+    <!-- 模式切換按鈕 -->
+    <button id="theme-toggle" class="theme-toggle">
+      <i class="fa-solid fa-moon"></i>
+    </button>
+
+    <script>
+    const toggle = document.getElementById("theme-toggle");
+    const body = document.body;
+
+    toggle.addEventListener("click", () => {
+      body.classList.toggle("dark-mode");
+      const icon = toggle.querySelector("i");
+      if (body.classList.contains("dark-mode")) {
+        icon.classList.replace("fa-moon", "fa-sun");
+        } else {
+        icon.classList.replace("fa-sun", "fa-moon");
+        }
+        });
+      </script>
+
+  </body>
+</html>
