@@ -85,7 +85,8 @@ body {
 }
 
 .message.user {
-  flex-direction: row-reverse;
+  flex-direction: row;        /* 把 row-reverse 改回一般方向 */
+  justify-content: flex-end;  /* 整組對話靠右對齊 */
 }
 
 .message.user .message-content {
@@ -353,7 +354,7 @@ body {
 
 /* === 左側固定欄（背景保留＋玻璃效果） === */
 #header {
-  width: 27%;
+  width: 30%;
   text-align: left;
   padding-left: 3em;
   padding-right: 2.5em;
@@ -365,8 +366,8 @@ body {
 
 /* === 右側主要內容區 === */
 #main {
-  margin-left: 28%;                  /* ✅ 調整回略低於 header 寬度，避免溢出 */
-  width: calc(100% - 28%);           /* ✅ 不超過整體寬度 */
+  margin-left: 35%;                  /* ✅ 調整回略低於 header 寬度，避免溢出 */
+  width: calc(100% - 35%);           /* ✅ 不超過整體寬度 */
   padding-left: 3.5em;
   padding-right: 3.5em;
   box-sizing: border-box;
@@ -528,9 +529,10 @@ body {
 /* 強化標題字層次與亮度 */
 #header h1 strong {
   color: #fff;
-  font-size: 1.9em;
+  font-size: 1.7em;        /* 原本 1.9em → 稍微縮小 */
   letter-spacing: 1.2px;
   text-shadow: 0 0 8px rgba(255, 255, 255, 0.45);
+  white-space: nowrap;     /* 加這行：整串文字不要換行 */
 }
 
 
