@@ -1,0 +1,56 @@
+[
+  {
+    "name": "冠軍磁磚｜奶油白木紋磚 20x120cm",
+    "image": "./assets/images/tiles/1.jpg",
+    "link": "https://www.champion.com.tw/products/wood_white_120",
+    "price": 890
+  },
+  {
+    "name": "冠軍磁磚｜墨岩灰石英磚 60x60cm",
+    "image": "./assets/images/tiles/2.jpg",
+    "link": "https://www.champion.com.tw/products/graystone_60",
+    "price": 980
+  },
+  {
+    "name": "冠軍磁磚｜夜幕黑石紋磚 60x60cm",
+    "image": "./assets/images/tiles/夜幕黑.jpg",
+    "link": "https://www.champion.com.tw/products/night_black_60",
+    "price": 950
+  },
+  {
+    "name": "冠軍磁磚｜岩石灰外牆磚 45x90cm",
+    "image": "./assets/images/tiles/岩石輝.jpg",
+    "link": "https://www.champion.com.tw/products/outdoor_gray_90",
+    "price": 1350
+  },
+  {
+    "name": "冠軍磁磚｜清水模風水泥磚 60x60cm",
+    "image": "./assets/images/tiles/清水模風.jpg",
+    "link": "https://www.champion.com.tw/products/concrete_gray_60",
+    "price": 880
+  },
+  {
+    "name": "冠軍磁磚｜森林綠拋光磚 60x120cm",
+    "image": "./assets/images/tiles/森林綠.jpg",
+    "link": "https://www.champion.com.tw/products/forest_green_120",
+    "price": 1780
+  },
+  {
+    "name": "冠軍磁磚｜琥珀金拋光磚 80x80cm",
+    "image": "./assets/images/tiles/琥珀金拋光.jpg",
+    "link": "https://www.champion.com.tw/products/amber_gold_80",
+    "price": 1450
+  },
+  {
+    "name": "冠軍磁磚｜雲白大理石磚 60x120cm",
+    "image": "./assets/images/tiles/雲白.jpg",
+    "link": "https://www.champion.com.tw/products/marble_white_120",
+    "price": 1680
+  },
+  {
+    "name": "冠軍磁磚｜暖沙米灰磁磚 30x60cm",
+    "image": "./assets/images/tiles/暖沙米輝.jpg",
+    "link": "https://www.champion.com.tw/products/sand_gray_60",
+    "price": 720
+  }
+]
