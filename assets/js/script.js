@@ -1,6 +1,6 @@
 // Gemini API 配置
 const GEMINI_API_KEY = "AIzaSyAxHPoBSKaWqwoUJqxyGdq7dj1SlZVMTWo";
-const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
 
 // 格式化消息文本
 function formatMessage(text) {
