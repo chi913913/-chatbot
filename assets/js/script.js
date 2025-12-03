@@ -212,7 +212,7 @@ async function sendImageToGemini(imageData, fileName) {
         console.log('API 回應狀態:', response.status);
 
         if (!response.ok) {
-            throw new Error(`API金要已達上限: ${response.status}`);
+            throw new Error(`API金鑰已達上限: ${response.status}`);
         }
 
         const data = await response.json();
