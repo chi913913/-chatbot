@@ -61,16 +61,15 @@
                 <div class="dz-icon">📷</div>
                 <div class="dz-text">
                   <p><strong>拖放照片到此</strong> 或點擊選擇</p>
-                  <p class="hint">支援 JPG / PNG，建議 &lt; 10MB</p>
+                  <p class="hint">支援 JPG / PNG，最多 3 張，建議 &lt; 10MB</p>
                 </div>
               </div>
             </div>
 
             <!-- 圖片預覽 -->
-            <input id="image-input" type="file" accept="image/*" style="display:none;" onchange="handleImageUpload(event)" />
+            <input id="image-input" type="file" accept="image/*" multiple style="display:none;" onchange="handleImageUpload(event)" />
             <div id="image-preview" class="image-preview" style="display:none;">
-              <img id="preview-img" src="" alt="預覽圖片" />
-              <button id="remove-image" onclick="removeImage()" title="移除圖片">×</button>
+              <!-- 預覽內容將由 JavaScript 動態生成 -->
             </div>
             <!-- === 預設問題按鈕區 === -->
             <div class="quick-questions">
@@ -101,7 +100,7 @@
             <div class="card info">
               <h3>快速上手</h3>
               <ol>
-                <li>點 <strong>上傳圖片</strong> 或直接拖放照片。</li>
+                <li>點 <strong>上傳圖片</strong> 或直接拖放照片（最多 3 張）。</li>
                 <li>輸入需求（例：<em>想要北歐風+木地板</em>）。</li>
                 <li>按 <strong>發送</strong>，AI 會回覆坪數、風格與商品建議。</li>
               </ol>
@@ -158,10 +157,13 @@
         dz.addEventListener(evt, e => { e.preventDefault(); dz.classList.remove('dragging'); });
       });
       dz.addEventListener('drop', e => {
-        const file = e.dataTransfer.files && e.dataTransfer.files[0];
-        if (file) {
+        const files = e.dataTransfer.files;
+        if (files && files.length > 0) {
           const dt = new DataTransfer();
-          dt.items.add(file);
+          // 將所有檔案添加到 DataTransfer 物件
+          Array.from(files).forEach(file => {
+            dt.items.add(file);
+          });
           fileInput.files = dt.files;
           const event = new Event('change');
           fileInput.dispatchEvent(event);
