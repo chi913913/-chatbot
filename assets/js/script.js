@@ -84,14 +84,40 @@ function displayMessage(role, message, imageData = null) {
 
   // 圖片內容（如果有）
   if (imageData) {
-    const image = document.createElement('img');
-    image.src = imageData;
-    image.className = 'uploaded-image';
-    image.alt = '上傳的圖片';
-    image.style.maxWidth = '100%';
-    image.style.borderRadius = '12px';
-    image.style.marginTop = '8px';
-    messageContent.appendChild(image);
+    // 處理單張圖片（向後兼容）
+    if (typeof imageData === 'string') {
+      const image = document.createElement('img');
+      image.src = imageData;
+      image.className = 'uploaded-image';
+      image.alt = '上傳的圖片';
+      image.style.maxWidth = '100%';
+      image.style.borderRadius = '12px';
+      image.style.marginTop = '8px';
+      messageContent.appendChild(image);
+    }
+    // 處理多張圖片（陣列）
+    else if (Array.isArray(imageData) && imageData.length > 0) {
+      const imagesContainer = document.createElement('div');
+      imagesContainer.style.display = 'flex';
+      imagesContainer.style.flexWrap = 'wrap';
+      imagesContainer.style.gap = '8px';
+      imagesContainer.style.marginTop = '8px';
+      
+      imageData.forEach((imgData, index) => {
+        const image = document.createElement('img');
+        image.src = imgData;
+        image.className = 'uploaded-image';
+        image.alt = `上傳的圖片 ${index + 1}`;
+        image.style.maxWidth = '200px';
+        image.style.maxHeight = '200px';
+        image.style.objectFit = 'contain';
+        image.style.borderRadius = '12px';
+        image.style.border = '1px solid #ddd';
+        imagesContainer.appendChild(image);
+      });
+      
+      messageContent.appendChild(imagesContainer);
+    }
   }
 
   if (role === 'user') {
@@ -115,57 +141,179 @@ messagesContainer.appendChild(messageWrapper);
 messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
-// 全域變數存儲當前選擇的圖片
-let currentImageData = null;
+// 全域變數存儲當前選擇的圖片（陣列，最多 3 張）
+let currentImageData = [];
+const MAX_IMAGES = 3;
 
 // 處理圖片上傳
 function handleImageUpload(event) {
-    const file = event.target.files[0];
-    if (!file) return;
+    const files = Array.from(event.target.files);
+    if (!files || files.length === 0) return;
 
-    // 檢查檔案類型
-    if (!file.type.startsWith('image/')) {
-        alert('請選擇圖片檔案！');
+    // 檢查是否會超過最大數量限制
+    const remainingSlots = MAX_IMAGES - currentImageData.length;
+    if (remainingSlots <= 0) {
+        alert(`最多只能上傳 ${MAX_IMAGES} 張圖片！`);
+        event.target.value = '';
         return;
     }
 
-    // 檢查檔案大小 (限制為 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-        alert('圖片檔案太大，請選擇小於 10MB 的圖片！');
-        return;
+    // 限制本次上傳的檔案數量
+    const filesToProcess = files.slice(0, remainingSlots);
+    if (files.length > remainingSlots) {
+        alert(`您已選擇 ${files.length} 張圖片，但最多只能上傳 ${MAX_IMAGES} 張。將只處理前 ${remainingSlots} 張。`);
     }
 
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const imageData = e.target.result;
+    let processedCount = 0;
+    let validFilesCount = 0;
+
+    filesToProcess.forEach(file => {
+        // 檢查檔案類型
+        if (!file.type.startsWith('image/')) {
+            alert(`檔案 "${file.name}" 不是圖片檔案，將跳過！`);
+            processedCount++;
+            // 檢查是否所有檔案都處理完成
+            if (processedCount === filesToProcess.length && validFilesCount > 0) {
+                showImagePreview();
+            }
+            return;
+        }
+
+        // 檢查檔案大小 (限制為 10MB)
+        if (file.size > 10 * 1024 * 1024) {
+            alert(`圖片 "${file.name}" 檔案太大（超過 10MB），將跳過！`);
+            processedCount++;
+            // 檢查是否所有檔案都處理完成
+            if (processedCount === filesToProcess.length && validFilesCount > 0) {
+                showImagePreview();
+            }
+            return;
+        }
+
+        validFilesCount++;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const imageData = e.target.result;
+            
+            // 檢查是否已達到最大數量（防止異步操作導致超過限制）
+            if (currentImageData.length >= MAX_IMAGES) {
+                alert(`已達到最大上傳數量（${MAX_IMAGES} 張）！`);
+                processedCount++;
+                if (processedCount === filesToProcess.length) {
+                    showImagePreview();
+                }
+                return;
+            }
+            
+            // 儲存圖片數據到陣列
+            currentImageData.push(imageData);
+            
+            processedCount++;
+            
+            // 當所有檔案處理完成後，更新預覽
+            if (processedCount === filesToProcess.length) {
+                showImagePreview();
+            }
+        };
         
-        // 儲存圖片數據
-        currentImageData = imageData;
+        reader.onerror = function() {
+            alert(`讀取檔案 "${file.name}" 時發生錯誤！`);
+            processedCount++;
+            if (processedCount === filesToProcess.length && validFilesCount > 0) {
+                showImagePreview();
+            }
+        };
         
-        // 顯示圖片預覽
-        showImagePreview(imageData);
-    };
-    
-    reader.readAsDataURL(file);
+        reader.readAsDataURL(file);
+    });
     
     // 清空檔案輸入
     event.target.value = '';
 }
 
 // 顯示圖片預覽
-function showImagePreview(imageData) {
+function showImagePreview() {
     const previewContainer = document.getElementById('image-preview');
-    const previewImg = document.getElementById('preview-img');
+    if (!previewContainer) return;
     
-    previewImg.src = imageData;
+    // 清空現有預覽內容
+    previewContainer.innerHTML = '';
+    
+    if (currentImageData.length === 0) {
+        previewContainer.style.display = 'none';
+        return;
+    }
+    
     previewContainer.style.display = 'block';
+    
+    // 創建預覽標題
+    const title = document.createElement('div');
+    title.style.marginBottom = '8px';
+    title.style.fontSize = '14px';
+    title.style.color = '#666';
+    title.textContent = `已選擇 ${currentImageData.length}/${MAX_IMAGES} 張圖片`;
+    previewContainer.appendChild(title);
+    
+    // 創建圖片容器
+    const imagesWrapper = document.createElement('div');
+    imagesWrapper.style.display = 'flex';
+    imagesWrapper.style.flexWrap = 'wrap';
+    imagesWrapper.style.gap = '8px';
+    
+    // 為每張圖片創建預覽元素
+    currentImageData.forEach((imageData, index) => {
+        const imageWrapper = document.createElement('div');
+        imageWrapper.style.position = 'relative';
+        imageWrapper.style.display = 'inline-block';
+        
+        const previewImg = document.createElement('img');
+        previewImg.src = imageData;
+        previewImg.style.width = '100px';
+        previewImg.style.height = '100px';
+        previewImg.style.objectFit = 'cover';
+        previewImg.style.borderRadius = '8px';
+        previewImg.style.border = '2px solid #ddd';
+        
+        // 創建移除按鈕
+        const removeBtn = document.createElement('button');
+        removeBtn.textContent = '×';
+        removeBtn.style.position = 'absolute';
+        removeBtn.style.top = '-8px';
+        removeBtn.style.right = '-8px';
+        removeBtn.style.width = '24px';
+        removeBtn.style.height = '24px';
+        removeBtn.style.borderRadius = '50%';
+        removeBtn.style.border = 'none';
+        removeBtn.style.background = '#ff4444';
+        removeBtn.style.color = 'white';
+        removeBtn.style.cursor = 'pointer';
+        removeBtn.style.fontSize = '18px';
+        removeBtn.style.lineHeight = '20px';
+        removeBtn.style.display = 'flex';
+        removeBtn.style.alignItems = 'center';
+        removeBtn.style.justifyContent = 'center';
+        removeBtn.onclick = () => removeImage(index);
+        
+        imageWrapper.appendChild(previewImg);
+        imageWrapper.appendChild(removeBtn);
+        imagesWrapper.appendChild(imageWrapper);
+    });
+    
+    previewContainer.appendChild(imagesWrapper);
 }
 
 // 移除圖片
-function removeImage() {
-    const previewContainer = document.getElementById('image-preview');
-    currentImageData = null;
-    previewContainer.style.display = 'none';
+function removeImage(index) {
+    if (index !== undefined && index >= 0 && index < currentImageData.length) {
+        // 移除指定索引的圖片
+        currentImageData.splice(index, 1);
+    } else {
+        // 如果沒有指定索引，清空所有圖片
+        currentImageData = [];
+    }
+    
+    // 更新預覽顯示
+    showImagePreview();
 }
 
 // 發送圖片到 Gemini Vision API
@@ -252,14 +400,14 @@ async function sendMessage() {
     const message = inputElement.value.trim();
     
     // 如果沒有文字消息也沒有圖片，則不發送
-    if (!message && !currentImageData) return;
+    if (!message && (!currentImageData || currentImageData.length === 0)) return;
     
-    const imageToSend = currentImageData;
+    const imagesToSend = currentImageData.length > 0 ? [...currentImageData] : null;
 
     // 顯示用戶消息
-    if (imageToSend) {
+    if (imagesToSend && imagesToSend.length > 0) {
         // 顯示圖片
-        displayMessage('user', null, imageToSend);
+        displayMessage('user', null, imagesToSend);
     }
     if (message) {
         // 顯示文字
@@ -268,7 +416,7 @@ async function sendMessage() {
 
     // 清空輸入和圖片預覽
     inputElement.value = '';
-    removeImage();
+    removeImage(); // 清空所有圖片
 
     // 顯示加載動畫
     const loadingElement = document.getElementById('loading');
@@ -286,13 +434,23 @@ async function sendMessage() {
         }
         
         // 如果有圖片，添加圖片部分
-        if (imageToSend) {
-            const base64Data = imageToSend.split(',')[1];
-            parts.push({
-                inline_data: {
-                    mime_type: "image/jpeg",
-                    data: base64Data
+        if (imagesToSend && imagesToSend.length > 0) {
+            imagesToSend.forEach(imageData => {
+                const base64Data = imageData.split(',')[1];
+                // 嘗試檢測圖片類型，預設為 jpeg
+                let mimeType = "image/jpeg";
+                if (imageData.startsWith('data:image/')) {
+                    const match = imageData.match(/data:image\/([^;]+)/);
+                    if (match) {
+                        mimeType = `image/${match[1]}`;
+                    }
                 }
+                parts.push({
+                    inline_data: {
+                        mime_type: mimeType,
+                        data: base64Data
+                    }
+                });
             });
         }
 
